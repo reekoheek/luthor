@@ -1,0 +1,43 @@
+
+.navbar {
+    background: #f5f5f5;
+    padding: 10px 7px;
+    border-top: 1px solid #{$border-color};
+    border-bottom: 1px solid #{$border-color};
+    z-index: 99;
+    display: block;
+
+    &:after {
+        // padding: 10px 7px;
+        content: " ";
+    }
+
+    &.fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        &~div {
+            padding-top: 50px;
+        }
+    }
+
+    a {
+        margin: 0;
+        border-right: 1px solid #ccc;
+        padding: 0 10px;
+        width: 100px;
+        display: inline-block;
+
+
+        &:last-child {
+            border-right: 0;
+        }
+
+        &:hover {
+            color: blue;
+            font-weight: bold;
+        }
+    }
+}

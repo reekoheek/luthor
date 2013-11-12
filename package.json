@@ -1,0 +1,58 @@
+{
+  "name": "luthor",
+  "version": "0.0.1",
+  "description": "pax package",
+  "repository": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-compass": "~0.6.0"
+  },
+  "pax": {
+    "grunt": {
+      "clean": {
+        "dist": [
+          "www/fonts",
+          "www/css"
+        ]
+      },
+      "build": {
+        "dist": [
+          "compass",
+          "copy"
+        ]
+      },
+      "compass": {
+        "dist": {
+          "options": {
+            "sassDir": "assets/scss",
+            "cssDir": "www/css"
+          }
+        }
+      },
+      "copy": {
+        "naked": {
+          "src": "bower_components/naked/css/*",
+          "dest": "www/css/",
+          "expand": true,
+          "flatten": true,
+          "filter": "isFile"
+        },
+        "font-awesome-css": {
+          "src": "bower_components/font-awesome/css/*",
+          "dest": "www/css/",
+          "expand": true,
+          "flatten": true,
+          "filter": "isFile"
+        },
+        "font-awesome-fonts": {
+          "src": "bower_components/font-awesome/fonts/*",
+          "dest": "www/fonts/",
+          "expand": true,
+          "flatten": true,
+          "filter": "isFile"
+        }
+      }
+    }
+  }
+}
