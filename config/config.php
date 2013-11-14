@@ -37,8 +37,8 @@ return array(
     'norm.schemas' => array(
         'Container' => array(
             'name' => new \Norm\Schema\String('name', 'Name'),
-            'state' => new \Norm\Schema\String('state', 'State'),
-            'pid' => new \Norm\Schema\Integer('pid', 'PID'),
+            'state' => (new \Norm\Schema\String('state', 'State'))->set('readOnly', true),
+            'pid' => (new \Norm\Schema\Integer('pid', 'PID'))->set('readOnly', true),
             'ip_address' => new \Norm\Schema\String('ip_address', 'IP Address'),
             'mem_usage' => (new \Norm\Schema\String('mem_usage', 'Mem Usage'))
                 ->set('cellFormat', function($value) {
@@ -62,7 +62,7 @@ return array(
         ),
         'Template' => array(
             'name' => new \Norm\Schema\String('name', 'Name'),
-            'filename' => new \Norm\Schema\String('filename', 'Filename'),
+            'filename' => (new \Norm\Schema\String('filename', 'Filename'))->set('readOnly', true),
             'content' => new \Norm\Schema\Text('content', 'Content'),
         ),
     ),

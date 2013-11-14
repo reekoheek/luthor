@@ -5,3 +5,4 @@
 /vendor
 /bower_components
 /.sass-cache
+/db

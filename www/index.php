@@ -4,7 +4,8 @@ require '../vendor/autoload.php';
 use \App\LXC\Host;
 
 $app = new \Bono\App(array(
-    'autorun' => false
+    'autorun' => false,
+    'mode' => 'production',
 ));
 
 $app->get('/', function() use ($app) {
