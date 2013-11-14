@@ -1,6 +1,6 @@
 {
   "name": "jafar/luthor",
-  "description": "pax package",
+  "description": "Luthor",
   "version": "0.0.1",
   "autoload": {
     "psr-0": {
@@ -11,17 +11,7 @@
     "phpunit/phpunit": "3.7.22"
   },
   "require": {
-    "xinix-technology/norm": "dev-master",
-    "xinix-technology/bono": "dev-master"
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/xinix-technology/norm.git"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/xinix-technology/bono.git"
-    }
-  ]
+    "xinix-technology/norm": "~0.0.2",
+    "xinix-technology/bono": "~0.0.4"
+  }
 }
