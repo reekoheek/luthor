@@ -4,9 +4,7 @@
   "version": "0.0.1",
   "autoload": {
     "psr-0": {
-      "App": "src/",
-      "Bono": "../lib/bono/src",
-      "Norm": "../lib/norm/src"
+      "App": "src/"
     }
   },
   "require-dev": {
