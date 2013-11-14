@@ -11,7 +11,7 @@
     "phpunit/phpunit": "3.7.22"
   },
   "require": {
-    "xinix-technology/norm": "~0.0.2",
-    "xinix-technology/bono": "~0.0.4"
+    "xinix-technology/norm": ">=0.0.2",
+    "xinix-technology/bono": ">=0.0.4"
   }
 }
