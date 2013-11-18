@@ -46,8 +46,12 @@ return array(
         'Container' => array(
             'model' => '\\App\\Model\\Container',
             'schema' => array(
-                'name' => String::getInstance('name')->set('required', true),
+                'name' => String::getInstance('name')->filter('trim|required')->set('required', true),
                 'ip_address' => String::getInstance('ip_address', 'IP Address'),
+                'memlimit' => Integer::getInstance('memlimit', 'Memory Limit'),
+                'memswlimit' => Integer::getInstance('memswlimit', 'Mem+Swap Limit'),
+                'cpus' => Integer::getInstance('cpus', 'CPUS'),
+                'cpu_shares' => Integer::getInstance('cpu_shares', 'CPU Shares'),
                 'mem_usage' => Integer::getInstance('mem_usage', 'Mem Usage')->set('readonly', true)
                     ->set('cellFormat', function($value) {
                         return sprintf('%.1fM', $value / 1000000);

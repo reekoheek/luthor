@@ -21,3 +21,4 @@ rsync -avz -e "ssh -p 1022" \
     ./ xinix@xinix.co.id:/var/domains/luthor.dev.xinix.co.id/
 
 ssh -p 1022 xinix@xinix.co.id -- "mkdir -p /var/domains/luthor.dev.xinix.co.id/db && chmod 0777 /var/domains/luthor.dev.xinix.co.id/db"
+ssh -p 1022 xinix@xinix.co.id -- "mkdir -p /var/domains/luthor.dev.xinix.co.id/tmp && chmod 0777 /var/domains/luthor.dev.xinix.co.id/tmp"

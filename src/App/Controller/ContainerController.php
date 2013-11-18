@@ -21,7 +21,7 @@ class ContainerController extends NormController {
     }
 
     public function create() {
-        $templates = \Norm\Norm::factory('Template')->find(array('luthor_version!ne' => ''));
+        $templates = \Norm\Norm::factory('Template')->find(array('luthor_version' => 'v1'));
         $this->data['_templates'] = array();
         foreach ($templates as $key => $template) {
             $this->data['_templates'][$template['name']] = $template['name'];
@@ -40,19 +40,15 @@ class ContainerController extends NormController {
         }
     }
 
-    // FIXME reekoheek: update should be redo
-    // public function update($id) {
-    //     if ($this->request->isPost()) {
-    //         $this->flash('info', 'Container updated.');
-    //         $this->redirect($this->getBaseUri());
-    //     } else {
-    //         $this->data['entry'] = $this->lxc->getInfo($id);
-
-    //         if (is_null($this->data['entry'])) {
-    //             $this->app->notFound();
-    //         }
-    //     }
-    // }
+    public function update($id) {
+        if ($this->request->isPost() || $this->request->isPut()) {
+            $this->lxc->setMemLimit($this->data['entry']['name'], $this->data['entry']['memlimit']);
+            $this->lxc->setMemSwLimit($this->data['entry']['name'], $this->data['entry']['memswlimit']);
+            $this->lxc->setCPUS($this->data['entry']['name'], $this->data['entry']['cpus']);
+            $this->lxc->setCPUShares($this->data['entry']['name'], $this->data['entry']['cpu_shares']);
+        }
+        return parent::update($id);
+    }
 
     public function delete($id) {
         $model = $this->collection->findOne($id);
@@ -110,7 +106,7 @@ class ContainerController extends NormController {
             $model = $this->collection->findOne(array('name' => $key));
             $this->populateOne($entry, $model);
         }
-        $this->flash('info', 'Template populated.');
+        $this->flash('info', 'Container populated.');
         $this->redirect($this->getBaseUri());
     }
 
@@ -125,6 +121,10 @@ class ContainerController extends NormController {
         $model->set('state', $entry['state'] ?: 0);
         $model->set('pid', $entry['pid'] ?: 0);
         $model->set('ip_address', isset($entry['ip_address']) ? $entry['ip_address'] : '');
+        $model->set('memlimit', $entry['memlimit']);
+        $model->set('memswlimit', $entry['memswlimit']);
+        $model->set('cpus', $entry['cpus']);
+        $model->set('cpu_shares', $entry['cpu_shares']);
         $model->save();
     }
 }

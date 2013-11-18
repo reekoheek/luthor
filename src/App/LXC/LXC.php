@@ -84,7 +84,13 @@ class LXC {
                 $info['state'] = $this->STATES[$info['state']];
             }
 
-            return array_merge($info, $this->load($id));
+            $info['memlimit'] = $this->getMemLimit($id);
+            $info['memswlimit'] = $this->getMemSwLimit($id);
+            $info['cpus'] = $this->getCPUS($id);
+            $info['cpu_shares'] = $this->getCPUShares($id);
+
+            // FIXME load is broken
+            return $info; //array_merge($info, $this->load($id));
         }
     }
 
@@ -94,6 +100,170 @@ class LXC {
         if ($result) {
             return $result[0];
         }
+    }
+
+    public function getMemLimit($id) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.memory.limit_in_bytes') !== false) {
+                $line = explode('=',$line);
+                return trim($line[1]);
+            }
+        }
+    }
+
+    public function setMemLimit($id, $value) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        $result = array();
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.memory.limit_in_bytes') === false) {
+                $result[] = $line;
+            }
+        }
+
+        if (!empty($value)) {
+            $result[] = 'lxc.cgroup.memory.limit_in_bytes = '.$value;
+        }
+
+
+        $tmpFile = tempnam('../tmp', 't');
+
+        file_put_contents($tmpFile, implode("\n", $result));
+
+        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s"', $tmpFile, $this->config['directory'].'/'.$id.'/config'), $result);
+
+        unlink($tmpFile);
+    }
+
+    public function getMemSwLimit($id) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.memory.memsw.limit_in_bytes') !== false) {
+                $line = explode('=',$line);
+                return trim($line[1]);
+            }
+        }
+    }
+
+    public function setMemSwLimit($id, $value) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        $result = array();
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.memory.memsw.limit_in_bytes') === false) {
+                $result[] = $line;
+            }
+        }
+
+        if (!empty($value)) {
+            $result[] = 'lxc.cgroup.memory.memsw.limit_in_bytes = '.$value;
+        }
+
+
+        $tmpFile = tempnam('../tmp', 't');
+
+        file_put_contents($tmpFile, implode("\n", $result));
+
+        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s"', $tmpFile, $this->config['directory'].'/'.$id.'/config'), $result);
+
+        unlink($tmpFile);
+    }
+
+    public function getCPUS($id) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.cpuset.cpus') !== false) {
+                $line = explode('=',$line);
+                return trim($line[1]);
+            }
+        }
+    }
+
+    public function setCPUS($id, $value) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        $result = array();
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.cpuset.cpus') === false) {
+                $result[] = $line;
+            }
+        }
+
+        if (!empty($value)) {
+            $result[] = 'lxc.cgroup.cpuset.cpus = '.$value;
+        }
+
+
+        $tmpFile = tempnam('../tmp', 't');
+
+        file_put_contents($tmpFile, implode("\n", $result));
+
+        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s"', $tmpFile, $this->config['directory'].'/'.$id.'/config'), $result);
+
+        unlink($tmpFile);
+    }
+
+    public function getCPUShares($id) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.cpu.shares') !== false) {
+                $line = explode('=',$line);
+                return trim($line[1]);
+            }
+        }
+    }
+
+    public function setCPUShares($id, $value) {
+        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+        $result = array();
+        foreach ($content as $key => $line) {
+            $line = trim($line);
+            if (empty($line) || $line[0] == '#') {
+                continue;
+            }
+            if (strpos($line, 'lxc.cgroup.cpu.shares') === false) {
+                $result[] = $line;
+            }
+        }
+
+        if (!empty($value)) {
+            $result[] = 'lxc.cgroup.cpu.shares = '.$value;
+        }
+
+
+        $tmpFile = tempnam('../tmp', 't');
+
+        file_put_contents($tmpFile, implode("\n", $result));
+
+        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s"', $tmpFile, $this->config['directory'].'/'.$id.'/config'), $result);
+
+        unlink($tmpFile);
     }
 
     public function find() {
@@ -175,20 +345,20 @@ class LXC {
         }
     }
 
-    public function load($id) {
-        $result = array();
-        $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
-        foreach ($content as $line) {
-            $line = trim($line);
-            if (!empty($line) && $line[0] !== '#') {
+    // public function load($id) {
+    //     $result = array();
+    //     $content = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
+    //     foreach ($content as $line) {
+    //         $line = trim($line);
+    //         if (!empty($line) && $line[0] !== '#') {
 
-                $l = explode('=', $line, 2);
-                $result[trim($l[0])] = trim($l[1]);
-            }
-        }
+    //             $l = explode('=', $line, 2);
+    //             $result[trim($l[0])] = trim($l[1]);
+    //         }
+    //     }
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     public function save($id, $info) {
         $toSave = array();
