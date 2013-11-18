@@ -4,47 +4,33 @@ namespace App\Controller;
 
 use Norm\Norm;
 use App\LXC\LXC;
+use App\LXC\Template;
 use Bono\Helper\URL;
-use Bono\Controller\RestController;
+use Norm\Controller\NormController;
 
-class ContainerController extends RestController {
+class ContainerController extends NormController {
     public function __construct($app, $name) {
         parent::__construct($app, $name);
 
-        $app->get($this->getBaseUri().'/:id/onoff', array($this, 'delegate'))->name('onoff');
-        $app->get($this->getBaseUri().'/:id/poke', array($this, 'delegate'))->name('poke');
+        $this->map('/null/populate', 'populate')->via('GET');
+        $this->map('/:id/onoff', 'onoff')->via('GET');
+        $this->map('/:id/poke', 'poke')->via('GET');
 
-        $this->lxc = new LXC($app->config('lxc'));
-
-        $schema = $this->app->config('norm.schemas');
-        $this->data['_schema'] = $schema['Container'];
-
-        $this->data['_templates'] = $this->lxc->getTemplates();
-    }
-
-    public function search() {
-
-        $toggleOnOff = function($entry) {
-            if ($entry['state'] === 0) {
-                return 'Start';
-            } else {
-                return 'Stop';
-            }
-        };
-
-        $this->data['_actions'] = array(
-            'start' => array('label' => $toggleOnOff, 'url' => $this->getBaseUri().'/%s/onoff'),
-            'update' => array('label' => 'Update', 'url' => $this->getBaseUri().'/%s/update'),
-            'delete' => array('label' => 'Delete', 'url' => $this->getBaseUri().'/%s/delete'),
-        );
-
-        $this->data['entries'] = $this->lxc->find();
+        $this->lxc = LXC::getInstance();
+        $this->lxcTemplate = new Template($this->app->config('lxc'));
     }
 
     public function create() {
+        $templates = \Norm\Norm::factory('Template')->find(array('luthor_version!ne' => ''));
+        $this->data['_templates'] = array();
+        foreach ($templates as $key => $template) {
+            $this->data['_templates'][$template['name']] = $template['name'];
+        }
+
         if ($this->request->isPost()) {
             try {
-                $this->lxc->create($this->data['entry']['name'], $this->data['entry']['template']);
+                $entry = $this->lxc->create($this->data['entry']);
+                $this->populateOne($entry);
             } catch(\Exception $e) {
                 return $this->flashNow('error', $e->getMessage());
             }
@@ -54,102 +40,91 @@ class ContainerController extends RestController {
         }
     }
 
-    public function read($id) {
-        $this->data['entry'] = $this->lxc->getInfo($id);
+    // FIXME reekoheek: update should be redo
+    // public function update($id) {
+    //     if ($this->request->isPost()) {
+    //         $this->flash('info', 'Container updated.');
+    //         $this->redirect($this->getBaseUri());
+    //     } else {
+    //         $this->data['entry'] = $this->lxc->getInfo($id);
 
-        if (is_null($this->data['entry'])) {
-            $this->app->notFound();
-        }
-    }
-
-    public function update($id) {
-        if ($this->request->isPost()) {
-            $this->flash('info', 'Container updated.');
-            $this->redirect($this->getBaseUri());
-        } else {
-            $this->data['entry'] = $this->lxc->getInfo($id);
-
-            if (is_null($this->data['entry'])) {
-                $this->app->notFound();
-            }
-        }
-    }
+    //         if (is_null($this->data['entry'])) {
+    //             $this->app->notFound();
+    //         }
+    //     }
+    // }
 
     public function delete($id) {
+        $model = $this->collection->findOne($id);
+        if (is_null($model)) {
+            $this->app->notFound();
+        }
+
         if ($this->request->isPost()) {
             try {
-                $info = $this->lxc->getInfo($id);
-                if ($info['state'] !== 0) {
+                if ($model['state'] != 0) {
                     throw new \Exception('Container is running, stop the container first to delete.');
                 }
-                $this->lxc->destroy($id);
+
+                if (!is_null($this->lxc->findOne($model['name']))) {
+                    $this->lxc->destroy($model['name']);
+                }
+
+                $model->remove();
             } catch(\Exception $e) {
                 return $this->flashNow('error', $e->getMessage());
             }
 
             $this->flash('info', 'Container deleted.');
             $this->redirect($this->getBaseUri());
-        } else {
-            $this->data['entry'] = $this->lxc->getInfo($id);
-
-            if (is_null($this->data['entry'])) {
-                $this->app->notFound();
-            }
-
-
         }
     }
 
-    // protected function ipCIDRCheck ($IP, $CIDR) {
-    //     list ($net, $mask) = explode ("/", $CIDR);
-
-    //     $ip_net = ip2long ($net);
-    //     $ip_mask = ~((1 << (32 - $mask)) - 1);
-
-    //     $ip_ip = ip2long ($IP);
-
-    //     $ip_ip_net = $ip_ip & $ip_mask;
-
-    //     return ($ip_ip_net == $ip_net);
-    // }
-
-    // public function poke($id) {
-    //     $this->response->template('');
-    //     $allowed = $this->app->config('lxc');
-    //     $allowed = $this->ipCIDRCheck($_SERVER['REMOTE_ADDR'], $allowed['luthor.allowed']);
-    //     if (!$allowed) {
-    //         $this->app->notFound();
-    //     }
-
-    //     $info = $this->lxc->getInfo($id);
-    //     if (empty($info)) {
-    //         $this->app->notFound();
-    //     } else {
-    //         $info['luthor.ip_address'] = $_SERVER['REMOTE_ADDR'];
-    //         $this->lxc->save($id, $info);
-    //     }
-    // }
-
     public function onoff($id) {
-        $info = $this->lxc->getInfo($id);
+        $model = $this->collection->findOne($id);
 
-        if (is_null($info)) {
+        if (is_null($model)) {
             $this->app->notFound();
             return;
         }
 
         try {
-            if ($info['state'] === 0) {
-                $this->lxc->start($id);
+            if ($model['state'] == 0) {
+                $info = $this->lxc->start($model['name']);
+                $this->populateOne($info, $model);
                 $this->flash('info', 'Container started.');
             } else {
-                $this->lxc->stop($id);
+                $info = $this->lxc->stop($model['name']);
+                $this->populateOne($info, $model);
                 $this->flash('info', 'Container stopped.');
             }
         } catch(\Exception $e) {
-            return $this->flashNow('error', $e->getMessage());
+            $this->flash('error', $e->getMessage());
         }
-        sleep(1);
         $this->redirect($this->getBaseUri());
+    }
+
+    public function populate() {
+        $entries = $this->lxc->find();
+        foreach ($entries as $key => $entry) {
+            $model = $this->collection->findOne(array('name' => $key));
+            $this->populateOne($entry, $model);
+        }
+        $this->flash('info', 'Template populated.');
+        $this->redirect($this->getBaseUri());
+    }
+
+    protected function populateOne($entry, $model = NULL) {
+        if (is_null($model)) {
+            $model = $this->collection->newInstance();
+        } elseif (!is_object($model)) {
+            $model = $this->collection->findOne($model);
+        }
+
+        $model->set('name', $entry['name']);
+        $model->set('state', $entry['state'] ?: 0);
+        $model->set('pid', $entry['pid'] ?: 0);
+        $model->set('ip_address', isset($entry['ip_address']) ? $entry['ip_address'] : '');
+        $model->save();
     }
 }

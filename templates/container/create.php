@@ -1,22 +1,19 @@
+<h2><?php echo $_controller->clazz ?></h2>
+
 <form action="" method="POST" enctype="multipart/form-data">
     <fieldset>
-        <legend>Container</legend>
         <div class="row">
             <div class="span-12">
-                <label><?php echo $_('Name') ?></label>
-                <input type="text" name="name" value="<?php echo @$entry['name'] ?>" />
-            </div>
-        </div>
-        <div class="row">
-            <div class="span-12">
-                <label><?php echo $_('Template') ?></label>
+                <label>Template*</label>
                 <select name="template">
+                    <option value="">---</option>
                     <?php foreach($_templates as $id => $template): ?>
                     <option value="<?php echo $id ?>"><?php echo $template ?></option>
                     <?php endforeach ?>
                 </select>
             </div>
         </div>
+        <?php echo $_form->renderFields(@$entry) ?>
     </fieldset>
     <div class="row">
         <input type="submit" value="Save" class="button">

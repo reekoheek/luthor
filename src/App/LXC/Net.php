@@ -4,9 +4,8 @@ namespace App\LXC;
 
 class Net {
 
-    public function getInfo($name) {
+    public function findOne($name) {
         $entry = array(
-            '$id' => $name,
             'name' => $name,
         );
         $result = '';
@@ -19,7 +18,8 @@ class Net {
             }
         }
 
-        $entry['state'] = ($entry['active'] === 'active') ? 1 : 0;
+
+        $entry['state'] = ($entry['active'] === 'yes') ? 1 : 0;
         $entry['autostart'] = ($entry['autostart'] === 'yes') ? 1 : 0;
         $entry['persistent'] = ($entry['persistent'] === 'yes') ? 1 : 0;
         unset($entry['active']);
@@ -51,17 +51,25 @@ class Net {
             if ($value) {
                 $row = preg_split('/[\\s]+/', $value);
 
-                $entry = $this->getInfo($row[0]);
+                $entry = $this->findOne($row[0]);
                 $entries[] = $entry;
             }
         }
 
+        // var_dump($entries);
+        // exit;
+
         return $entries;
+    }
+
+    public function destroy($name) {
+        $result = '';
+        return $this->exec('net-undefine '.$name, array(), $result);
     }
 
     protected function exec($command, $args, &$result) {
         $errCode = 0;
-        exec(sprintf('virsh -c lxc:/// %s ', $command).implode(' ', $args), $result, $errCode);
+        exec(sprintf('sudo virsh -c lxc:/// %s ', $command).implode(' ', $args), $result, $errCode);
         return $errCode;
     }
 

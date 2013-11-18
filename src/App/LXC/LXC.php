@@ -3,6 +3,8 @@
 namespace App\LXC;
 
 class LXC {
+    protected static $instance;
+
     protected $STATES = array(
         'STOPPED' => 0,
         'RUNNING' => 1,
@@ -17,26 +19,56 @@ class LXC {
         $this->config = $config;
     }
 
+    public static function getInstance() {
+        if (is_null(static::$instance)) {
+            $app = \Bono\App::getInstance();
+            $config = $app->config('lxc');
+            static::$instance = new LXC($config);
+        }
+
+        return static::$instance;
+    }
+
     public function exists($name) {
-        $indices = $this->getIndices();
+        $indices = $this->getIndices(true);
         return array_key_exists($name, $indices);
     }
 
-    public function getIndices() {
-        if (is_null($this->indices) && $handle = opendir($this->config['directory'])) {
-            $this->indices = array();
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry[0] != '.') {
-                    $this->indices[$entry] = $entry;
+    public function getIndices($force = false) {
+        if ($force || is_null($this->indices)) {
+            if ($handle = opendir($this->config['directory'])) {
+                $this->indices = array();
+                while (false !== ($entry = readdir($handle))) {
+                    if ($entry[0] != '.') {
+                        $this->indices[$entry] = $entry;
+                    }
                 }
+                closedir($handle);
             }
-            closedir($handle);
         }
         return $this->indices;
     }
 
+    public function getIPAddress($id) {
+        $lines = explode("\n", file_get_contents($this->config['directory'].'/'.$id.'/config'));
 
-    public function getInfo($id) {
+        foreach ($lines as $line) {
+            if (strpos($line, 'lxc.network.ipv4') === 0) {
+                $ip = explode('=', $line);
+                $ip = trim($ip[1]);
+                $ip = explode('/', $ip);
+                return $ip[0];
+            }
+        }
+
+        $result = exec(sprintf('dig @%s %s +short', $this->config['luthor.ip'], $id));
+        if ($result) {
+            return $result;
+        }
+    }
+
+
+    public function findOne($id) {
         if ($this->exists($id)) {
 
             $info = array();
@@ -45,29 +77,22 @@ class LXC {
             if (!$errCode && $result) {
                 $state = explode(':', $result[0]);
                 $pid = explode(':', $result[1]);
-                $info['$id'] = $id;
+
                 $info['name'] = $id;
                 $info['state'] = trim($state[1]);
-                $info['pid'] = (int) $pid[1];
-
-
+                $info['pid'] = ($pid[1] == -1) ? NULL : (int) $pid[1];
                 $info['state'] = $this->STATES[$info['state']];
-
-                if ($info['state'] === 1) {
-                    $result = exec(sprintf('dig @%s %s +short', $this->config['luthor.ip'], $id));
-                    if ($result) {
-                        $info['ip_address'] = $result;
-                    }
-
-                    $errCode = $this->exec('lxc-cgroup', sprintf('-n %s memory.usage_in_bytes', $id), $result);
-                    if ($result) {
-                        $info['mem_usage'] = $result[0];
-                    }
-                }
-
             }
 
             return array_merge($info, $this->load($id));
+        }
+    }
+
+    public function getMemUsage($id) {
+        $result = '';
+        $errCode = $this->exec('lxc-cgroup', sprintf('-n %s memory.usage_in_bytes', $id), $result);
+        if ($result) {
+            return $result[0];
         }
     }
 
@@ -75,21 +100,40 @@ class LXC {
         $indices = $this->getIndices();
         $containers = array();
         foreach ($indices as $index) {
-            $containers[$index] = $this->getInfo($index);
+            $containers[$index] = $this->findOne($index);
         }
 
         return $containers;
     }
 
-    public function create($name, $template) {
+    public function create($options) {
+        $name = $options['name'];
+        $template = $options['template'];
+
         if ($this->exists($name)) {
             throw new \Exception(sprintf('Container %s already exists', $name));
         }
 
-        $errCode = $this->exec('lxc-create', sprintf('-n "%s" -t "%s"', $name, $template), $result);
+        $arg = NULL;
+        if (!empty($options['ip_address'])) {
+            if (is_null($arg)) $arg = ' --';
+            $arg .= ' -i '.$options['ip_address'];
+        }
+
+        $errCode = $this->exec('lxc-create', sprintf('-n "%s" -t "%s" %s', $name, $template, $arg), $result);
         if ($errCode) {
             throw new \Exception('Something wrong happened in the middle of process');
         }
+
+        $info = null;
+        for($i = 0; $i < 10; $i++) {
+            $info = $this->findOne($name);
+            if (isset($info)) return $info;
+            sleep(1);
+        }
+
+        throw new \Exception('Wrong state or something wrong happened in the middle of process');
+
     }
 
     public function start($name) {
@@ -97,6 +141,15 @@ class LXC {
         if ($errCode) {
             throw new \Exception('Something wrong happened in the middle of process');
         }
+
+        $info = null;
+        for($i = 0; $i < 5; $i++) {
+            $info = $this->findOne($name);
+            if ($info['state'] != 0) return $info;
+            sleep(1);
+        }
+
+        throw new \Exception('Wrong state or something wrong happened in the middle of process');
     }
 
     public function stop($name) {
@@ -104,6 +157,15 @@ class LXC {
         if ($errCode) {
             throw new \Exception('Something wrong happened in the middle of process');
         }
+
+        $info = null;
+        for($i = 0; $i < 5; $i++) {
+            $info = $this->findOne($name);
+            if ($info['state'] == 0) return $info;
+            sleep(1);
+        }
+
+        throw new \Exception('Wrong state or something wrong happened in the middle of process');
     }
 
     public function destroy($name) {
@@ -111,76 +173,6 @@ class LXC {
         if ($errCode) {
             throw new \Exception('Something wrong happened in the middle of process');
         }
-    }
-
-    public function getTemplates() {
-        if (is_null($this->templates) && $handle = opendir($this->config['templatesDirectory'])) {
-            $this->templates = array();
-            while (false !== ($entry = readdir($handle))) {
-                if (is_file($this->config['templatesDirectory'].'/'.$entry) && strpos($entry, 'lxc-')  === 0) {
-                    $entry = substr($entry, 4);
-                    $this->templates[$entry] = $entry;
-                }
-            }
-            closedir($handle);
-        }
-        return $this->templates;
-    }
-
-    public function findTemplates() {
-        $entries = array();
-        $templates = $this->getTemplates();
-        foreach ($templates as $template) {
-            $entries[] = array(
-                '$id' => $template,
-                'name' => $template,
-                'filename' => $this->config['templatesDirectory'].'/'.$template,
-            );
-        }
-        return $entries;
-    }
-
-    public function getTemplate($id) {
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
-
-        if (is_readable($file)) {
-            $result = array(
-                '$id' => $id,
-                'name' => $id,
-                'filename' => $file,
-                'content' => file_get_contents($file),
-            );
-            return $result;
-        }
-
-    }
-
-    public function saveTemplate($id, $template) {
-        if (is_null($id)) {
-            $id = $template['name'];
-        }
-
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
-
-        $tmpFile = tempnam('../tmp', 't');
-
-        $content = str_replace("\r", "", $template['content']);
-
-        file_put_contents($tmpFile, $content);
-
-        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s" 0755', $tmpFile, $file), $result);
-
-        unlink($tmpFile);
-
-        return ($errCode) ? false : true;
-
-    }
-
-    public function deleteTemplate($id) {
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
-
-        $a = $this->exec('../bin/luthor-delete', $file, $result);
-
     }
 
     public function load($id) {

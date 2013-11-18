@@ -2,68 +2,81 @@
 
 namespace App\Controller;
 
-use App\LXC\LXC;
-use Bono\Controller\RestController;
+use App\LXC\Template;
+use Norm\Controller\NormController;
 
-class TemplateController extends RestController {
+class TemplateController extends NormController {
+
+    protected $template;
 
     public function __construct($app, $name) {
         parent::__construct($app, $name);
 
-        $this->lxc = new LXC($app->config('lxc'));
+        $this->map('/null/populate', 'populate')->via('GET');
+
+        $this->template = new Template($app->config('lxc'));
 
         $schema = $this->app->config('norm.schemas');
-        $this->data['_schema'] = $schema['Template'];
-
-        $this->data['_templates'] = $this->lxc->getTemplates();
     }
 
-    public function search() {
+    // public function search() {
+    //     $entries = $this->template->find();
 
-        $this->data['_actions'] = array(
-            'update' => NULL,
-            'delete' => NULL,
-        );
+    //     $this->data['entries'] = $entries;
+    // }
 
-        $entries = $this->lxc->findTemplates();
+    public function populate() {
+        $entries = $this->template->find();
+        foreach ($entries as $key => $entry) {
+            $model = $this->collection->findOne(array('name' => $key));
+            $this->populateOne($entry, $model);
+        }
+        $this->flash('info', 'Template populated.');
+        $this->redirect($this->getBaseUri());
+    }
 
-        $this->data['entries'] = $entries;
+    protected function populateOne($entry, $model = NULL) {
+        if (is_null($model)) {
+            $model = $this->collection->newInstance();
+        } elseif (!is_object($model)) {
+            $model = $this->collection->findOne($model);
+        }
+
+        $model->set($entry);
+        $model->save();
     }
 
     public function create() {
-        if (!$this->request->isGet()) {
-            $this->lxc->saveTemplate(NULL, $this->data['entry']);
+        if ($this->request->isPost()) {
+            $this->template->save(NULL, $this->data['entry']);
 
-            $this->flash('info', 'Template is inserted.');
+            $this->populateOne($this->data['entry']);
+
+            $this->flash('info', 'Template created.');
             $this->redirect($this->getBaseUri());
         }
-    }
-
-    public function read($id) {
-        throw new \Exception(__METHOD__.' not implemented yet!');
     }
 
     public function update($id) {
-        if ($this->request->isGet()) {
-            $template = $this->lxc->getTemplate($id);
-            if (empty($template)) {
-                $this->app->notFound();
-            }
-            $this->data['entry'] = $template;
-        } else {
-            $this->lxc->saveTemplate($id, $this->data['entry']);
+        if ($this->request->isPost() || $this->request->isPut()) {
+            $model = $this->collection->findOne($id);
+            $entry = $this->template->save($this->data['entry']['name'], $this->data['entry']);
+            $this->populateOne($entry, $model);
 
-            $this->flash('info', 'Template is updated.');
+            $this->flash('info', 'Template updated.');
             $this->redirect($this->getBaseUri());
         }
+
+        parent::update($id);
     }
 
     public function delete($id) {
-        if (!$this->request->isGet()) {
-            $this->lxc->deleteTemplate($id);
 
-            $this->flash('info', 'Template is deleted.');
-            $this->redirect($this->getBaseUri());
+        if (!$this->request->isGet()) {
+            $model = $this->collection->findOne($id);
+            $this->template->delete($model['name']);
         }
+
+        return parent::delete($id);
     }
 }

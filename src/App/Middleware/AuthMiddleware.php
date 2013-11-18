@@ -21,7 +21,7 @@ class AuthMiddleware extends \Slim\Middleware {
             $post = $this->app->request->post();
             $userModel = $collection->findOne(array('username' => $post['username']));
 
-            if (isset($userModel) && $userModel->get('password') === $post['password']) {
+            if (isset($userModel) && $userModel->get('password') === salt($post['password'])) {
                 $_SESSION['user'] = $userModel->get('username');
 
                 $response->redirect('/');

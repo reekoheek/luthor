@@ -1,15 +1,9 @@
+<h2><?php echo $_controller->clazz ?></h2>
+
 <?php $entry = ($entry instanceof \Norm\Model) ? $entry->toArray() : $entry ?>
 <form action="" method="POST">
     <fieldset>
-        <legend>Container</legend>
-        <?php foreach ($_schema as $field): ?>
-        <div class="row">
-            <div class="span-12">
-                <label><?php echo $field['label'] ?></label>
-                <?php echo $field->input(@$entry[$field['name']], @$entry) ?>
-            </div>
-        </div>
-        <?php endforeach ?>
+        <?php echo $_form->renderFields(@$entry) ?>
     </fieldset>
     <div class="row">
         <input type="submit" value="Save" class="button">

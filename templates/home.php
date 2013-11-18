@@ -1,29 +1,13 @@
 <?php
 
-function secs_to_v($secs) {
-    $units = array(
-        "weeks"   => 7*24*3600,
-        "days"    =>   24*3600,
-        "hours"   =>      3600,
-        "minutes" =>        60,
-        "seconds" =>         1,
-    );
-
-    foreach ( $units as &$unit ) {
-        $quot  = intval($secs / $unit);
-        $secs -= $quot * $unit;
-        $unit  = $quot;
-    }
-
-    return $units;
-}
+use App\Helper\Common;
 
 ?>
 
 <div class="row">
     <div class="span-6">
         <label>Uptime</label>
-        <?php $v = secs_to_v($info['uptime']['up']) ?>
+        <?php $v = Common::secsToV($info['uptime']['up']) ?>
         <span class="field">
             <?php foreach($v as $key => $value): ?>
                 <?php if ($value): ?>
@@ -34,7 +18,7 @@ function secs_to_v($secs) {
     </div>
     <div class="span-6">
         <label>Idle</label>
-        <?php $v = secs_to_v($info['uptime']['idle']) ?>
+        <?php $v = Common::secsToV($info['uptime']['idle']) ?>
         <span class="field">
             <?php foreach($v as $key => $value): ?>
                 <?php if ($value): ?>
