@@ -1,9 +1,9 @@
 #!/bin/sh
 
-sudo cp -r "$1" "$2"
+cp -r "$1" "$2"
 
 if [ "$3" = "" ]; then
     exit 0
 fi
 
-sudo chmod "$3" "$2"
+chmod "$3" "$2"

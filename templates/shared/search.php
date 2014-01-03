@@ -1,5 +1,17 @@
-<h2><?php echo $_controller->clazz ?></h2>
+<?php
 
-<?php echo $_searchButtonGroup->show() ?>
+use \Bono\App;
+use \Bono\Helper\URL;
+use \ROH\BonoComponent\PlainTable;
 
-<?php echo $_table->show($entries) ?>
+$c = App::getInstance()->controller;
+$t = new PlainTable($c->clazz, array());
+?>
+
+<h2></h2>
+
+<div class="button-group">
+    <a href="#" class="button"><?php echo $c->clazz ?></a>
+    <a href="<?php echo URL::site($c->getBaseUri().'/null/create') ?>" class="button">Add</a>
+</div>
+<?php echo $t->show($entries) ?>

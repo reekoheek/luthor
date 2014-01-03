@@ -70,18 +70,16 @@ class NetworkController extends NormController {
         $entries = $this->net->find();
 
         foreach ($entries as $key => $entry) {
-            $model = $this->collection->findOne(array('name' => $key));
-            $this->populateOne($entry, $model);
+            $this->_populate($entry);
         }
         $this->flash('info', 'Network populated.');
         $this->redirect($this->getBaseUri());
     }
 
-    protected function populateOne($entry, $model = NULL) {
+    protected function _populate($entry) {
+        $model = $this->collection->findOne(array('name' => $entry['name']));
         if (is_null($model)) {
             $model = $this->collection->newInstance();
-        } elseif (!is_object($model)) {
-            $model = $this->collection->findOne($model);
         }
 
         $model->set($entry);

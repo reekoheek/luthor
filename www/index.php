@@ -8,14 +8,13 @@ $app = new \Bono\App(array(
     'mode' => 'production',
 ));
 
-function salt($value) {
-    if (!empty($value)) {
-        $salt = \Bono\App::getInstance()->config('app.salt');
-        $value = hash('sha512', $salt.$value);
-    }
-
-    return $value;
-}
+// function salt($value) {
+//     if (!empty($value)) {
+//         $salt = \Bono\App::getInstance()->config('app.salt');
+//         $value = hash('sha512', $salt.$value);
+//     }
+//     return $value;
+// }
 
 $app->get('/', function() use ($app) {
     $response = $app->response;

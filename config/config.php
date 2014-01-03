@@ -5,23 +5,25 @@ use \Norm\Schema\Password;
 use \Norm\Schema\Integer;
 use \Norm\Schema\Boolean;
 use \Norm\Schema\Text;
+use \Norm\Schema\Reference;
+use \Norm\Schema\Object;
 
 return array(
-    'app.salt' => 'f67f7b84d57d1ee681c3bc6ab490ef327f4c433aeecab6e13e231fbfb98d2062',
+    // 'app.salt' => 'f67f7b84d57d1ee681c3bc6ab490ef327f4c433aeecab6e13e231fbfb98d2062',
     'bono.providers' => array(
         '\\Bono\\Provider\\LanguageProvider',
         '\\Norm\\Provider\\NormProvider',
-        '\\App\\Provider\\AppProvider',
     ),
     'bono.middlewares' => array(
         '\\Bono\\Middleware\\ControllerMiddleware',
         '\\Bono\\Middleware\\ContentNegotiatorMiddleware',
-        '\\App\\Middleware\\AuthMiddleware',
+        '\\ROH\\BonoAuth\\Middleware\\AuthMiddleware',
         '\\Bono\\Middleware\\SessionMiddleware',
     ),
     'bono.controllers' => array(
         'default' => '\\Norm\\Controller\\NormController',
         'mapping' => array(
+            '/anu' => NULL,
             '/user' => NULL,
             '/network' => '\\App\\Controller\\NetworkController',
             '/container' => '\\App\\Controller\\ContainerController',
@@ -43,60 +45,77 @@ return array(
         ),
     ),
     'norm.collections' => array(
-        'Container' => array(
-            'model' => '\\App\\Model\\Container',
-            'schema' => array(
-                'name' => String::getInstance('name')->filter('trim|required')->set('required', true),
-                'ip_address' => String::getInstance('ip_address', 'IP Address'),
-                'memlimit' => Integer::getInstance('memlimit', 'Memory Limit'),
-                'memswlimit' => Integer::getInstance('memswlimit', 'Mem+Swap Limit'),
-                'cpus' => Integer::getInstance('cpus', 'CPUS'),
-                'cpu_shares' => Integer::getInstance('cpu_shares', 'CPU Shares'),
-                'mem_usage' => Integer::getInstance('mem_usage', 'Mem Usage')->set('readonly', true)
-                    ->set('cellFormat', function($value) {
-                        return sprintf('%.1fM', $value / 1000000);
-                    }),
-                'state' => Integer::getInstance('state')->set('readonly', true),
-                'pid' => Integer::getInstance('pid', 'PID')->set('readonly', true),
+        'mapping' => array(
+            'Container' => array(
+                'model' => '\\App\\Model\\Container',
+                'schema' => array(
+                    'name' => String::getInstance('name')->filter('trim|required'),
+                    'network' => Reference::getInstance('network')->to('Network', 'name')->filter('trim|required'),
+                    'ip_address' => String::getInstance('ip_address', 'IP Address'),
+                    'memlimit' => String::getInstance('memlimit', 'Memory Limit'),
+                    'memswlimit' => String::getInstance('memswlimit', 'Mem+Swap Limit'),
+                    'cpus' => String::getInstance('cpus', 'CPUS'),
+                    'cpu_shares' => String::getInstance('cpu_shares', 'CPU Shares'),
+                    'state' => Integer::getInstance('state')->set('readonly', true),
+                    'pid' => Integer::getInstance('pid', 'PID')->set('readonly', true),
+                    'actual_ip_address' => String::getInstance('actual_ip_address', 'Actual IP Address')->set('readonly', true),
+                    'config' => Object::getInstance('config'),
+                ),
             ),
-        ),
-        'Network' => array(
-            'schema' => array(
-                'name' => String::getInstance('name'),
-                'uuid' => String::getInstance('uuid', 'UUID')->set('readonly', true),
-                'state' => Boolean::getInstance('state')->set('readonly', true),
-                'autostart' => Boolean::getInstance('autostart', 'Auto Start'),
-                'persistent' => Boolean::getInstance('persistent'),
-                'bridge' => String::getInstance('bridge'),
-                'ip_address' => String::getInstance('ip_address', 'IP Address'),
-                'netmask' => String::getInstance('netmask'),
-                'dhcp_start' => String::getInstance('dhcp_start', 'DHCP Start'),
-                'dhcp_end' => String::getInstance('dhcp_end', 'DHCP End'),
+            'Anu' => array(
+                // 'observers' =>
+                'schema' => array(
+                    'name' => String::getInstance('name')->filter('trim|required'),
+                    'description' => Text::getInstance('description'),
+                ),
             ),
-        ),
-        'User' => array(
-            'schema' => array(
-                'username' => String::getInstance('username')->filter('trim|required|unique:User,username'),
-                'password' => Password::getInstance('password')->filter('trim|confirmed|salt'),
+            'Network' => array(
+                'schema' => array(
+                    'name' => String::getInstance('name'),
+                    'uuid' => String::getInstance('uuid', 'UUID')->set('readonly', true),
+                    'state' => Boolean::getInstance('state')->set('readonly', true),
+                    'autostart' => Boolean::getInstance('autostart', 'Auto Start'),
+                    'persistent' => Boolean::getInstance('persistent'),
+                    'bridge' => String::getInstance('bridge'),
+                    'ip_address' => String::getInstance('ip_address', 'IP Address'),
+                    'netmask' => String::getInstance('netmask'),
+                    'dhcp_start' => String::getInstance('dhcp_start', 'DHCP Start'),
+                    'dhcp_end' => String::getInstance('dhcp_end', 'DHCP End'),
+                ),
             ),
-        ),
-        'Template' => array(
-            'schema' => array(
-                'name' => String::getInstance('name'),
-                'filename' => String::getInstance('filename')->set('readonly', true),
-                'luthor_version' => String::getInstance('luthor_version', 'Version')->set('readonly', true),
-                'content' => Text::getInstance('content'),
+            'User' => array(
+                'schema' => array(
+                    'username' => String::getInstance('username')->filter('trim|required|unique:User,username'),
+                    'password' => Password::getInstance('password')->filter('trim|confirmed'),
+                ),
+            ),
+            'Template' => array(
+                'schema' => array(
+                    'name' => String::getInstance('name'),
+                    'filename' => String::getInstance('filename')->set('readonly', true),
+                    'luthor_version' => String::getInstance('luthor_version', 'Version')->set('readonly', true),
+                    'content' => Text::getInstance('content'),
+                ),
             ),
         ),
     ),
     'component.form' => array(
         'mapping' => array(
+            'Container' => array(
+                'name' => NULL,
+                'network' => NULL,
+                'ip_address' => NULL,
+                'memlimit' => NULL,
+                'memswlimit' => NULL,
+                'cpus' => NULL,
+                'cpu_shares' => NULL,
+            ),
             'Template' => array(
                 'name' => NULL,
                 'content' => NULL,
             ),
             'Network' => array(
-                'state' => NULL,
+                // 'state' => NULL,
                 'name' => NULL,
                 'autostart' => NULL,
                 'bridge' => NULL,
@@ -117,14 +136,20 @@ return array(
                     'name' => NULL,
                     // 'state' => NULL,
                     'pid' => NULL,
-                    'ip_address' => NULL,
-                    'mem_usage' => NULL,
+                    'actual_ip_address' => NULL,
+                    'mem_usage' => function($value) {
+                        return sprintf('%.1fM', $value / 1000000);
+                    },
                 ),
                 'actions' => array(
                     'onoff' => function($key, $value, $context) {
                         $app = \Bono\App::getInstance();
                         $label = ($context['state'] != 0) ? 'Stop' : 'Start';
                         return "<a href=\"".\Bono\Helper\URL::site($app->controller->getBaseUri().'/'.$context['$id'].'/onoff')."\">$label</a>\n";
+                    },
+                    'chpasswd' => function($key, $value, $context) {
+                        $app = \Bono\App::getInstance();
+                        return "<a href=\"".\Bono\Helper\URL::site($app->controller->getBaseUri().'/'.$context['$id'].'/chpasswd')."\">Password</a>\n";
                     },
                     'update' => NULL,
                     'delete' => NULL,
@@ -159,14 +184,23 @@ return array(
     'lxc' => array(
         'directory' => '/var/lib/lxc',
         'templatesDirectory' => '/usr/share/lxc/templates',
+        'luthor.https' => false,
         'luthor.ip' => '192.168.122.1',
-        'luthor.path' => '/luthor/www/index.php',
+        'luthor.path' => '/app/luthor/www/index.php',
         'luthor.allowed' => '192.168.122.0/24',
     ),
     'auth' => array(
-        'allow' => array(
-            '/login' => NULL,
-            '/logout' => NULL,
-        ),
+        // array(
+        //     '/login' => NULL,
+        //     '/logout' => NULL,
+        // )
+        'allow' => function($request) {
+
+            if ($request->getSegments(1) == 'login' || $request->getSegments(1) == 'logout') {
+                return true;
+            } elseif ($request->getSegments(1) == 'container' && $request->getSegments(3) == 'poke') {
+                return true;
+            }
+        },
     ),
 );

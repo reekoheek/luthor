@@ -28,18 +28,16 @@ class TemplateController extends NormController {
     public function populate() {
         $entries = $this->template->find();
         foreach ($entries as $key => $entry) {
-            $model = $this->collection->findOne(array('name' => $key));
-            $this->populateOne($entry, $model);
+            $this->_populate($entry);
         }
         $this->flash('info', 'Template populated.');
         $this->redirect($this->getBaseUri());
     }
 
-    protected function populateOne($entry, $model = NULL) {
+    protected function _populate($entry, $model = NULL) {
+        $model = $this->collection->findOne(array('name' => $entry['name']));
         if (is_null($model)) {
             $model = $this->collection->newInstance();
-        } elseif (!is_object($model)) {
-            $model = $this->collection->findOne($model);
         }
 
         $model->set($entry);
@@ -48,9 +46,10 @@ class TemplateController extends NormController {
 
     public function create() {
         if ($this->request->isPost()) {
-            $this->template->save(NULL, $this->data['entry']);
+            $post = $this->request->post();
+            $this->template->save(NULL, $post);
 
-            $this->populateOne($this->data['entry']);
+            $this->_populate($post);
 
             $this->flash('info', 'Template created.');
             $this->redirect($this->getBaseUri());
@@ -59,9 +58,11 @@ class TemplateController extends NormController {
 
     public function update($id) {
         if ($this->request->isPost() || $this->request->isPut()) {
-            $model = $this->collection->findOne($id);
-            $entry = $this->template->save($this->data['entry']['name'], $this->data['entry']);
-            $this->populateOne($entry, $model);
+            $post = $this->request->post();
+
+            $entry = $this->template->save($post['name'], $post);
+
+            $this->_populate($entry);
 
             $this->flash('info', 'Template updated.');
             $this->redirect($this->getBaseUri());

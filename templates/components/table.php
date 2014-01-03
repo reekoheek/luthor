@@ -8,7 +8,7 @@
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($entries)): ?>
+            <?php if ($self->isEmpty($entries)): ?>
                 <tr><td style="text-align: center" colspan="100">No row available</td></tr>
             <?php else: ?>
                 <?php foreach ($entries as $key => $entry): ?>

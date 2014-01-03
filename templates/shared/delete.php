@@ -1,4 +1,11 @@
-<h2><?php echo $_controller->clazz ?></h2>
+<?php
+use Bono\App;
+
+$app = App::getInstance();
+$c = $app->controller;
+
+?>
+<h2><?php echo $c->clazz ?></h2>
 
 <form action="?confirm" method="POST">
     <fieldset>
@@ -6,5 +13,5 @@
     </fieldset>
 
     <input type="submit" value="OK">
-    <a href="<?php echo \Bono\Helper\URL::site($_controller->getBaseUri()) ?>" class="button">Cancel</a>
+    <a href="<?php echo \Bono\Helper\URL::site($c->getBaseUri()) ?>" class="button">Cancel</a>
 </form>

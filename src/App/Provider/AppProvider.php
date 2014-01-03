@@ -11,8 +11,6 @@ class AppProvider extends \Bono\Provider\Provider {
         $app = $this->app;
         $this->app->hook('bono.controller.before', function($options) use ($app) {
             if ($options['method'] === 'search') {
-                $table = new Table($options['controller']->clazz);
-                $this->app->response->set('_table', $table);
 
                 $searchButtonGroup = new SearchButtonGroup();
                 $this->app->response->set('_searchButtonGroup', $searchButtonGroup);

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "root:$3" | chroot "$1/$2/rootfs" chpasswd

@@ -6,6 +6,7 @@ return array(
             'dialect' => '\\Norm\\Dialect\\SqliteDialect',
             'prefix' => 'sqlite',
             'database' => '../db/luthor-production.db',
+            // 'autocreate' => true,
         ),
     ),
 );
