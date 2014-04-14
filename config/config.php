@@ -17,8 +17,8 @@ return array(
     'bono.middlewares' => array(
         '\\Bono\\Middleware\\ControllerMiddleware',
         '\\Bono\\Middleware\\ContentNegotiatorMiddleware',
-        '\\ROH\\BonoAuth\\Middleware\\AuthMiddleware',
-        '\\Bono\\Middleware\\SessionMiddleware',
+        // '\\ROH\\BonoAuth\\Middleware\\AuthMiddleware',
+        // '\\Bono\\Middleware\\SessionMiddleware',
     ),
     'bono.controllers' => array(
         'default' => '\\Norm\\Controller\\NormController',

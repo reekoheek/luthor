@@ -80,3 +80,4 @@ use App\Helper\Common;
         <span class="field" style="text-align: right"><?php echo $info['disk']['percent'] ?></span>
     </div>
 </div>
+
