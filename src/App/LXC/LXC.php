@@ -280,6 +280,8 @@ curl \"\$url\" >> /var/log/luthor.log
      */
     public function fetchInfo($name) {
         exec(sprintf('sudo lxc-info -qn "%s"', $name), $result, $errCode);
+        var_dump($result);
+        exit;
         $info = NULL;
         if (!$errCode && $result) {
             $state = explode(':', $result[0]);

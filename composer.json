@@ -1,21 +1,21 @@
 {
-  "name": "jafar/luthor",
-  "description": "Luthor",
-  "version": "0.0.1",
-  "autoload": {
-    "psr-0": {
-      "App": "src/",
-      "Norm": "/home/jafar/workspaces/php/lib/norm/src/",
-      "Bono": "/home/jafar/workspaces/php/lib/bono/src/",
-      "ROH\\BonoComponent": "/home/jafar/workspaces/php/lib/bono-component/src/"
+    "name": "jafar/luthor",
+    "description": "Luthor",
+    "version": "0.0.1",
+    "autoload": {
+        "psr-0": {
+            "App": "src/",
+            "Norm": "/home/jafar/workspaces/php/lib/norm/src/",
+            "Bono": "/home/jafar/workspaces/php/lib/bono/src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.22"
+    },
+    "require": {
+        "xinix-technology/norm": "~0.2.0",
+        "xinix-technology/bono": "~0.2.0",
+        "reekoheek/bootstrap-theme": "dev-master",
+        "reekoheek/bono-auth": "~0.1.3"
     }
-  },
-  "require-dev": {
-    "phpunit/phpunit": "3.7.22"
-  },
-  "require": {
-    "xinix-technology/norm": ">=0.1.2",
-    "xinix-technology/bono": ">=0.1.2",
-    "reekoheek/bono-auth": ">=0.1.1"
-  }
 }

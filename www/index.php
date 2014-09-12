@@ -5,7 +5,7 @@ use \App\LXC\Host;
 
 $app = new \Bono\App(array(
     'autorun' => false,
-    'mode' => 'production',
+    'mode' => 'development',
 ));
 
 // function salt($value) {
@@ -16,13 +16,13 @@ $app = new \Bono\App(array(
 //     return $value;
 // }
 
-$app->get('/', function() use ($app) {
+$app->get('/', function () use ($app) {
     $response = $app->response;
 
     $app->redirect('home');
 });
 
-$app->get('/home', function() use ($app) {
+$app->get('/home', function () use ($app) {
     $response = $app->response;
 
     $response->template('home');
