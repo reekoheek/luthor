@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "350ff79654e2c7a8f2641e78a6fde33e",
+    "hash": "8904224e7a47a3c49585fb831aa47869",
     "packages": [
         {
             "name": "filp/whoops",
@@ -199,12 +199,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reekoheek/bootstrap-theme.git",
-                "reference": "060e9bfdebe0ba55771d4b7d82224cea8c28a0b9"
+                "reference": "5e36cd0a83c33a98f8f5f1da186fb7b8c2d7e5e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reekoheek/bootstrap-theme/zipball/060e9bfdebe0ba55771d4b7d82224cea8c28a0b9",
-                "reference": "060e9bfdebe0ba55771d4b7d82224cea8c28a0b9",
+                "url": "https://api.github.com/repos/reekoheek/bootstrap-theme/zipball/5e36cd0a83c33a98f8f5f1da186fb7b8c2d7e5e0",
+                "reference": "5e36cd0a83c33a98f8f5f1da186fb7b8c2d7e5e0",
                 "shasum": ""
             },
             "type": "library",
@@ -224,7 +224,7 @@
                 }
             ],
             "description": "Bono Bootstrap Theme",
-            "time": "2014-09-12 13:44:31"
+            "time": "2014-09-16 11:22:32"
         },
         {
             "name": "reekoheek/jsonkit",
@@ -466,16 +466,16 @@
         },
         {
             "name": "xinix-technology/norm",
-            "version": "0.2.3",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xinix-technology/norm.git",
-                "reference": "aa944c1d4b8c21186a0edfab2ea0e52656896537"
+                "reference": "84a1283137cf88b6a094dc861e848de102244d31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/aa944c1d4b8c21186a0edfab2ea0e52656896537",
-                "reference": "aa944c1d4b8c21186a0edfab2ea0e52656896537",
+                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/84a1283137cf88b6a094dc861e848de102244d31",
+                "reference": "84a1283137cf88b6a094dc861e848de102244d31",
                 "shasum": ""
             },
             "require": {
@@ -515,7 +515,7 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2014-09-13 12:28:41"
+            "time": "2014-09-26 08:55:18"
         }
     ],
     "packages-dev": [
@@ -937,6 +937,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "xinix-technology/norm": 20,
         "reekoheek/bootstrap-theme": 20
     },
     "prefer-stable": false,

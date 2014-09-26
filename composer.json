@@ -4,9 +4,7 @@
     "version": "0.0.1",
     "autoload": {
         "psr-0": {
-            "App": "src/",
-            "ROH\\Theme\\BootstrapTheme": "/home/jafar/workspaces/php/themes/bootstrap-theme/src/",
-            "Norm": "/home/jafar/workspaces/php/lib/norm/src/"
+            "App": "src/"
         }
     },
     "require-dev": {
@@ -14,7 +12,7 @@
     },
 
     "require": {
-        "xinix-technology/norm": "~0.2.0",
+        "xinix-technology/norm": "dev-master",
         "xinix-technology/bono": "~0.2.0",
         "reekoheek/bootstrap-theme": "dev-master",
         "reekoheek/bono-auth": "~0.1.5"
