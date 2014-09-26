@@ -2,99 +2,50 @@
 
 namespace App\LXC;
 
-class Template {
-
-    protected $config;
-    protected $templates;
-
-    public function __construct($config) {
-        $this->config = $config;
-    }
-
-    public function find() {
-        $entries = array();
-        $templates = $this->ls();
-
-        foreach ($templates as $template) {
-            $entries[$template] = $this->findOne($template);
+class Template extends Object
+{
+    public function offsetSet($offset, $value)
+    {
+        if ($offset === 'name') {
+            $filename = $this->options['templatesDirectory'].'/lxc-'.$value;
+            parent::offsetSet('filename', $filename);
+            $content = is_readable($filename) ? file_get_contents($filename) : '';
+            parent::offsetSet('content', $content);
         }
-        return $entries;
+
+        return parent::offsetSet($offset, $value);
     }
 
-    public function findOne($id) {
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
+    public function save()
+    {
+        $orig = is_readable($this['filename']) ? file_get_contents($this['filename']) : '';
 
-        if (is_readable($file)) {
-            $result = array(
-                'name' => $id,
-                'filename' => $file,
-                'content' => file_get_contents($file),
+        if ($orig !== $this['content']) {
+            $tmpFile = tempnam('../tmp', 't');
+
+            file_put_contents($tmpFile, $this['content']);
+
+            exec(
+                sprintf(
+                    'sudo '.realpath(getcwd().'/../bin/luthor-copy').' "%s" "%s" 0755',
+                    $tmpFile,
+                    $this['filename']
+                ),
+                $result,
+                $errCode
             );
 
-            if (strpos($result['content'], '# !luthor') !== FALSE) {
-                preg_match('/\#\s+\!luthor\s+(.*)/', $result['content'], $matches);
-                $result['luthor_version'] = $matches[1];
-            }
-
-            return $result;
+            @unlink($tmpFile);
         }
-
     }
 
-    public function ls() {
-        if (is_null($this->templates) && $handle = opendir($this->config['templatesDirectory'])) {
-            $this->templates = array();
-            while (false !== ($entry = readdir($handle))) {
-                if (is_file($this->config['templatesDirectory'].'/'.$entry) && strpos($entry, 'lxc-')  === 0) {
-                    $entry = substr($entry, 4);
-                    $this->templates[$entry] = $entry;
-                }
-            }
-            closedir($handle);
-        }
-        return $this->templates;
+    public function destroy()
+    {
+        exec(
+            sprintf(
+                'sudo '.realpath(getcwd().'/../bin/luthor-delete').' "%s"',
+                $this['filename']
+            )
+        );
     }
-
-    public function save($id, $template) {
-        if (is_null($id)) {
-            $id = $template['name'];
-        }
-
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
-
-        $tmpFile = tempnam('../tmp', 't');
-
-        $content = str_replace("\r", "", $template['content']);
-
-        file_put_contents($tmpFile, $content);
-
-        $errCode = $this->exec('../bin/luthor-copy', sprintf('"%s" "%s" 0755', $tmpFile, $file), $result);
-
-        unlink($tmpFile);
-
-        return $this->findOne($id);
-
-        // return ($errCode) ? false : true;
-
-    }
-
-    public function delete($id) {
-        $file = $this->config['templatesDirectory'].'/lxc-'.$id;
-
-        $a = $this->exec('../bin/luthor-delete', $file, $result);
-
-    }
-
-    protected function exec($exe, $argString, &$result) {
-        if (isset($this->config['executables'][$exe])) {
-            $exe = $this->config['executables'][$exe];
-        }
-        $cmd = sprintf('sudo %s %s', $exe, $argString);
-
-        // var_dump($cmd);
-        exec($cmd, $result, $errCode);
-
-        return $errCode;
-    }
-
 }

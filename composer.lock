@@ -158,16 +158,16 @@
         },
         {
             "name": "reekoheek/bono-auth",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reekoheek/bono-auth.git",
-                "reference": "b5ab1c7a11d34459d082264059fbb35e506946a7"
+                "reference": "0c71907291574c4830a8d2271df731935f033fb6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reekoheek/bono-auth/zipball/b5ab1c7a11d34459d082264059fbb35e506946a7",
-                "reference": "b5ab1c7a11d34459d082264059fbb35e506946a7",
+                "url": "https://api.github.com/repos/reekoheek/bono-auth/zipball/0c71907291574c4830a8d2271df731935f033fb6",
+                "reference": "0c71907291574c4830a8d2271df731935f033fb6",
                 "shasum": ""
             },
             "require": {
@@ -191,7 +191,7 @@
                 }
             ],
             "description": "Bono Auth",
-            "time": "2014-09-13 05:06:49"
+            "time": "2014-09-13 09:34:28"
         },
         {
             "name": "reekoheek/bootstrap-theme",
@@ -406,16 +406,16 @@
         },
         {
             "name": "xinix-technology/bono",
-            "version": "0.2.1",
+            "version": "0.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xinix-technology/bono.git",
-                "reference": "c0781de3de6a19cf4a9c9253042a34909a5bf8f6"
+                "reference": "c0049ac11099416ed2b1eb986a061240b16d28e1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xinix-technology/bono/zipball/c0781de3de6a19cf4a9c9253042a34909a5bf8f6",
-                "reference": "c0781de3de6a19cf4a9c9253042a34909a5bf8f6",
+                "url": "https://api.github.com/repos/xinix-technology/bono/zipball/c0049ac11099416ed2b1eb986a061240b16d28e1",
+                "reference": "c0049ac11099416ed2b1eb986a061240b16d28e1",
                 "shasum": ""
             },
             "require": {
@@ -434,7 +434,7 @@
                     "Bono": "src/"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -462,20 +462,20 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2014-09-08 07:17:15"
+            "time": "2014-09-13 09:33:08"
         },
         {
             "name": "xinix-technology/norm",
-            "version": "0.2.1",
+            "version": "0.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xinix-technology/norm.git",
-                "reference": "e5048094a037b2d96a558d989586682ffe55d149"
+                "reference": "aa944c1d4b8c21186a0edfab2ea0e52656896537"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/e5048094a037b2d96a558d989586682ffe55d149",
-                "reference": "e5048094a037b2d96a558d989586682ffe55d149",
+                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/aa944c1d4b8c21186a0edfab2ea0e52656896537",
+                "reference": "aa944c1d4b8c21186a0edfab2ea0e52656896537",
                 "shasum": ""
             },
             "require": {
@@ -515,7 +515,7 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2014-09-08 07:28:08"
+            "time": "2014-09-13 12:28:41"
         }
     ],
     "packages-dev": [

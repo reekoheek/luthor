@@ -4,20 +4,39 @@ use Norm\Schema\String;
 use Norm\Schema\Reference;
 use Norm\Schema\Integer;
 use Norm\Schema\Object;
+use Norm\Schema\NormArray;
+
+use App\Schema\ContainerField;
 
 return array(
-    'model' => '\\App\\Model\\Container',
+    'observers' => array(
+        '\\App\\Observer\\ContainerObserver'
+    ),
     'schema' => array(
         'name' => String::create('name')->filter('trim|required'),
-        'network' => Reference::create('network')->to('Network', 'name')->filter('trim|required'),
-        'ip_address' => String::create('ip_address', 'IP Address'),
+
+        'template' => Reference::create('template')->to('Template', 'name', 'name')->set('transient', true),
+
         'memlimit' => String::create('memlimit', 'Memory Limit'),
         'memswlimit' => String::create('memswlimit', 'Mem+Swap Limit'),
         'cpus' => String::create('cpus', 'CPUS'),
         'cpu_shares' => String::create('cpu_shares', 'CPU Shares'),
-        'state' => Integer::create('state')->set('readonly', true),
-        'pid' => Integer::create('pid', 'PID')->set('readonly', true),
-        'actual_ip_address' => String::create('actual_ip_address', 'Actual IP Address')->set('readonly', true),
-        'config' => Object::create('config'),
+
+        'networks' => NormArray::create('networks')->set('hidden', true),
+
+        'state' => ContainerField::create('state'),
+        'pid' => ContainerField::create('pid', 'PID'),
+        'ip' => ContainerField::create('ip', 'IP Address'),
+        'cpu_use' => ContainerField::create('cpu_use'),
+        'blkio_use' => ContainerField::create('blkio_use'),
+        'memory_use' => ContainerField::create('memory_use'),
+        'link' => ContainerField::create('link'),
+        'tx_bytes' => ContainerField::create('tx_bytes'),
+        'rx_bytes' => ContainerField::create('rx_bytes'),
+        'total_bytes' => ContainerField::create('total_bytes'),
+
+
+        // 'actual_ip_address' => String::create('actual_ip_address', 'Actual IP Address')->set('readonly', true),
+        // 'config' => Object::create('config'),
     ),
 );

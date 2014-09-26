@@ -35,166 +35,39 @@
  */
 namespace App\Controller;
 
-use App\LXC\LXC;
-use App\LXC\Template;
+use App\LXC\ContainerList;
+use App\LXC\TemplateList;
 use Bono\Helper\URL;
 use Norm\Norm;
 use Norm\Filter\Filter;
+use Norm\Filter\FilterException;
 use Norm\Controller\NormController;
 
-class ContainerController extends NormController {
-    public function __construct($app, $name) {
+class ContainerController extends NormController
+{
+    protected $containers;
+    // protected $templates;
+
+    public function __construct($app, $name)
+    {
         parent::__construct($app, $name);
 
         $this->map('/null/populate', 'populate')->via('GET');
-        $this->map('/:id/onoff', 'onoff')->via('GET');
+        $this->map('/:id/start', 'start')->via('GET');
+        $this->map('/:id/stop', 'stop')->via('GET');
+        $this->map('/:id/network', 'network')->via('GET');
+        $this->map('/:id/network', 'networkAdd')->via('POST');
+        $this->map('/:id/network/:index/remove', 'networkRemove')->via('GET');
+        $this->map('/:id/attach', 'attach')->via('GET');
         $this->map('/:id/chpasswd', 'chpasswd')->via('GET', 'POST');
-        $this->map('/:id/poke', 'poke')->via('GET');
+        // $this->map('/:id/poke', 'poke')->via('GET');
 
-        $this->lxc = LXC::getInstance();
-        $this->lxcTemplate = new Template($this->app->config('lxc'));
+        $this->containers = ContainerList::getInstance();
+        // $this->templates = TemplateList::getInstance();
     }
 
-    public function chpasswd($id) {
-        if ($this->request->isPost()) {
-            $filter = new Filter(array(
-                        'password' => array(
-                            'trim', 'required', 'confirmed',
-                            ),
-                        ));
-            $filter->run($this->data['entry']);
-            $errors = $filter->errors();
-
-            if ($errors) {
-                return $this->flashNow('error', (new \Norm\Filter\FilterException())->sub($errors)->__toString());
-            }
-
-            $model = $this->collection->findOne($id);
-
-            $this->lxc->chpasswd($model['name'], $this->data['entry']['password']);
-
-            $this->flash('info', 'Password changed.');
-            $this->redirect($this->getBaseUri());
-        }
-    }
-
-    public function create() {
-        $templates = Norm::factory('Template')->find(array('luthor_version' => 'v1'));
-        $templateData = array();
-        foreach ($templates as $key => $template) {
-            $templateData[$template['name']] = $template['name'];
-        }
-
-        $this->set('_templates', $templateData);
-
-        if ($this->request->isPost()) {
-            try {
-                $post = $this->request->post();
-                $filter = Filter::fromSchema($this->collection->schema(), array(
-                            'template' => 'required',
-                            ));
-                $filter->run($post);
-                $errors = $filter->errors();
-
-                if ($errors) {
-                    throw new \Exception((new \Norm\Filter\FilterException())->sub($errors)->__toString());
-                }
-
-                $entry = array();
-                foreach ($post as $key => $value) {
-                    $entry[$key] = $value;
-                }
-                $entry['network_object'] = Norm::factory('Network')->findOne($entry['network']);
-                $entry = $this->lxc->create($entry);
-                $this->_populate($entry);
-            } catch(\Exception $e) {
-                var_dump($e);
-                exit;
-                return $this->flashNow('error', $e->getMessage());
-            }
-
-            $this->flash('info', 'Container created.');
-            $this->redirect($this->getBaseUri());
-        }
-    }
-
-    public function update($id) {
-        if ($this->request->isPost() || $this->request->isPut()) {
-            $post = $this->request->post();
-            $info = $this->lxc->findOne($post['name']);
-
-            $info['config'][LXC::$KEY['ID']] = $id;
-
-            $network = Norm::factory('Network')->findOne($post['network']);
-            $info['config'][LXC::$KEY['NETWORK_LINK']] = $network['bridge'];
-            $info['config'][LXC::$KEY['NETWORK_IPV4']] = '0.0.0.0';
-            $info['config'][LXC::$KEY['NETWORK_REPORT']] = $network['report'];
-            $info['config'][LXC::$KEY['NETWORK_NETMASK']] = $network['netmask'];
-            $info['config'][LXC::$KEY['NETWORK_GATEWAY']] = $network['ip_address'];
-
-            if ((empty($post['ip_address']))) {
-                unset($info['config'][LXC::$KEY['IP_ADDRESS']]);
-            } else {
-                $info['config'][LXC::$KEY['IP_ADDRESS']] = $post['ip_address'];
-            }
-            if ((empty($post['memlimit']))) {
-                unset($info['config'][LXC::$KEY['MEM_LIMIT']]);
-            } else {
-                $info['config'][LXC::$KEY['MEM_LIMIT']] = $post['memlimit'];
-            }
-            if ((empty($post['memswlimit']))) {
-                unset($info['config'][LXC::$KEY['MEMSW_LIMIT']]);
-            } else {
-                $info['config'][LXC::$KEY['MEMSW_LIMIT']] = $post['memswlimit'];
-            }
-            if ((empty($post['cpus']))) {
-                unset($info['config'][LXC::$KEY['CPUS']]);
-            } else {
-                $info['config'][LXC::$KEY['CPUS']] = $post['cpus'];
-            }
-            if ((empty($post['cpu_shares']))) {
-                unset($info['config'][LXC::$KEY['CPU_SHARES']]);
-            } else {
-                $info['config'][LXC::$KEY['CPU_SHARES']] = $post['cpu_shares'];
-            }
-
-            $this->lxc->storeConfig($post['name'], $info['config']);
-
-            $config = $this->lxc->fetchConfig($post['name']);
-            $a = $this->app->environment['slim.request.form_hash'];
-            $a['config'] = $config;
-            $this->app->environment['slim.request.form_hash'] = $a;
-        }
-        return parent::update($id);
-    }
-
-    public function delete($id) {
-        $model = $this->collection->findOne($id);
-        if (is_null($model)) {
-            $this->app->notFound();
-        }
-
-        if ($this->request->isPost()) {
-            try {
-                if ($model['state'] != 0) {
-                    throw new \Exception('Container is running, stop the container first to delete.');
-                }
-
-                if (!is_null($this->lxc->findOne($model['name']))) {
-                    $this->lxc->destroy($model['name']);
-                }
-
-                $model->remove();
-            } catch(\Exception $e) {
-                return $this->flashNow('error', $e->getMessage());
-            }
-
-            $this->flash('info', 'Container deleted.');
-            $this->redirect($this->getBaseUri());
-        }
-    }
-
-    public function onoff($id) {
+    public function attach($id)
+    {
         $model = $this->collection->findOne($id);
 
         if (is_null($model)) {
@@ -203,62 +76,224 @@ class ContainerController extends NormController {
         }
 
         try {
-            $model['actual_ip_address'] = '';
+            $this->data['entry'] = $model;
+            $container = $this->containers->findOne($model['name']);
+            if ($cmd = $this->request->get('cmd')) {
+                $result = $container->attach($cmd);
+                $this->data['result'] = $result;
+            }
+        } catch (\Exception $e) {
+            h('notification.error', $e);
+        }
+    }
+
+    public function populate()
+    {
+        try {
+            $entries = $this->containers->find();
+
+            foreach ($entries as $entry) {
+                $model = $this->collection->findOne(array('name' => $entry['name']));
+                if (!$model) {
+                    $model = $this->collection->newInstance();
+                }
+                $model->set($entry->toArray());
+                $model->save();
+            }
+            h('notification.info', 'Existing containers populated.');
+
+        } catch (\Exception $e) {
+            h('notification.error', $e);
+        }
+
+        $this->redirect($this->getBaseUri());
+    }
+
+    public function network($id)
+    {
+        $model = $this->collection->findOne($id);
+
+        if (is_null($model)) {
+            $this->app->notFound();
+            return;
+        }
+
+        try {
+            $this->data['entry'] = $model;
+        } catch (\Exception $e) {
+            h('notification.error', $e);
+        }
+    }
+
+    public function networkAdd($id)
+    {
+        $model = $this->collection->findOne($id);
+
+        if (is_null($model)) {
+            $this->app->notFound();
+            return;
+        }
+
+        try {
+            $post = array();
+            foreach ($this->request->post() as $k => $v) {
+                if (empty($v)) {
+                    continue;
+                }
+
+                $post[$k] = $v;
+            }
+            if ($post['type'] === 'none' || $post['type'] === 'empty') {
+                $post = array('type' => $post['type']);
+            }
+
+            if ($post['type'] === 'none' || $post['type'] === 'empty' ||
+                $model['networks'][0]['type'] === 'empty' || $model['networks'][0]['type'] === 'none') {
+                $networks = array(
+                    $post
+                );
+                $model['networks'] = $networks;
+            } else {
+                if (is_null($model['networks'])) {
+                    $model['networks'] = array();
+                }
+                $model['networks']->add($post);
+            }
             $model->save();
 
-            if ($model['state'] == 0) {
-                $info = $this->lxc->start($model['name']);
-                $this->flash('info', 'Container started.');
-            } else {
-                $info = $this->lxc->stop($model['name']);
-                $this->flash('info', 'Container stopped.');
-            }
-            $this->_populate($info);
-        } catch(\Exception $e) {
-            $this->flash('error', $e->getMessage());
+            h('notification.info', 'Container network added.');
+        } catch (\Exception $e) {
+            h('notification.error', $e);
         }
-        $this->redirect($this->getBaseUri());
+
+        $this->redirect(\URL::site($this->getBaseUri().'/'.$id.'/network'));
     }
 
-    public function poke($id) {
+    public function networkRemove($id, $networkIndex)
+    {
         $model = $this->collection->findOne($id);
-        $model['actual_ip_address'] = $_SERVER['REMOTE_ADDR'];
-        $model->save();
-        exit;
+
+        if (is_null($model)) {
+            $this->app->notFound();
+            return;
+        }
+
+        try {
+            $networks = array();
+            foreach ($model['networks'] as $index => $network) {
+                if ($index == $networkIndex) {
+                    continue;
+                }
+                $networks[] = $network;
+            }
+
+            if (empty($networks)) {
+                $networks[] = array(
+                    'type' => 'empty'
+                );
+            }
+
+            $model['networks'] = $networks;
+
+            $model->save();
+
+            h('notification.info', 'Container network removed.');
+        } catch (\Exception $e) {
+            h('notification.error', $e);
+        }
+
+        $this->redirect(\URL::site($this->getBaseUri().'/'.$id.'/network'));
     }
 
-    public function populate() {
-        try {
-            $entries = $this->lxc->find();
-            foreach ($entries as $entry) {
-                $this->_populate($entry);
-            }
-        } catch(\Exception $e) {
-            echo $e;
-            exit;
+    public function start($id)
+    {
+        $model = $this->collection->findOne($id);
+
+        if (is_null($model)) {
+            $this->app->notFound();
+            return;
         }
-        $this->flash('info', 'Container populated.');
+
+        try {
+            $container = $this->containers->findOne($model['name']);
+            $container->start();
+
+            $container = $this->containers->findOne($model['name']);
+            $model->set($container->toArray());
+            $model->save();
+
+            h('notification.info', 'Container started.');
+
+        } catch (\Exception $e) {
+            h('notification.error', $e);
+        }
+
         $this->redirect($this->getBaseUri());
     }
 
-    protected function _populate($entry) {
-        $model = $this->collection->findOne(array('name' => $entry['name']));
+    public function stop($id)
+    {
+        $model = $this->collection->findOne($id);
+
         if (is_null($model)) {
-            $model = $this->collection->newInstance();
+            $this->app->notFound();
+            return;
         }
 
-        $model->set($entry);
+        try {
+            $container = $this->containers->findOne($model['name']);
+            $container->stop();
 
-        if (isset($entry['config']['lxc.network.link'])) {
-            $network = Norm::factory('Network')->findOne(array('bridge' => $entry['config']['lxc.network.link']));
-            $model['network'] = $network;
+            $container = $this->containers->findOne($model['name']);
+            $model->set($container->toArray());
+            $model->save();
+
+            h('notification.info', 'Container stopped.');
+
+        } catch (\Exception $e) {
+            h('notification.error', $e);
         }
-        $model['ip_address'] = @$entry['config'][LXC::$KEY['IP_ADDRESS']];
-        $model['memlimit'] = @$entry['config'][LXC::$KEY['MEM_LIMIT']];
-        $model['memswlimit'] = @$entry['config'][LXC::$KEY['MEMSW_LIMIT']];
-        $model['cpus'] = @$entry['config'][LXC::$KEY['CPUS']];
-        $model['cpu_shares'] = @$entry['config'][LXC::$KEY['CPU_SHARES']];
 
-        $model->save();
+        $this->redirect($this->getBaseUri());
+    }
+
+    public function chpasswd($id)
+    {
+        $model = $this->collection->findOne($id);
+
+        if (is_null($model)) {
+            $this->app->notFound();
+            return;
+        }
+
+
+        if ($this->request->isPost()) {
+            $post = $this->request->post();
+            try {
+                $filter = Filter::create(array(
+                    'password' => 'trim|required|confirmed',
+                ));
+                $post = $filter->run($post);
+                $errors = $filter->errors();
+
+                if ($errors) {
+                    $e = new FilterException();
+                    $e->sub($errors);
+                    throw $e;
+                }
+
+                $model = $this->collection->findOne($id);
+                $container = $this->containers->findOne($model['name']);
+                $container->chpasswd($post['password']);
+
+                h('notification.info', 'Password changed.');
+
+                // $this->redirect($this->getBaseUri());
+            } catch (\Exception $e) {
+                h('notification.error', $e);
+            }
+        }
+
+        $this->data['entry'] = $model;
     }
 }

@@ -4,12 +4,15 @@
     "version": "0.0.1",
     "autoload": {
         "psr-0": {
-            "App": "src/"
+            "App": "src/",
+            "ROH\\Theme\\BootstrapTheme": "/home/jafar/workspaces/php/themes/bootstrap-theme/src/",
+            "Norm": "/home/jafar/workspaces/php/lib/norm/src/"
         }
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.22"
     },
+
     "require": {
         "xinix-technology/norm": "~0.2.0",
         "xinix-technology/bono": "~0.2.0",

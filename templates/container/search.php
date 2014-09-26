@@ -5,22 +5,35 @@
     <a href="<?php echo f('controller.url', '/null/populate') ?>" class="btn btn-default">Populate</a>
 </p>
 
+<style type="text/css">
+    .indicator {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: inline-block;
+        background-color: yellow;
+        box-shadow: 0px 0px 5px #ccc;
+    }
+
+    .indicator.off {
+        background-color: red;
+    }
+
+    .indicator.on {
+        background-color: green;
+    }
+</style>
+
 <div class="table-placeholder">
 
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <?php if (f('app')->controller->schema()): ?>
-                <?php $i = 0 ?>
-                <?php foreach(f('app')->controller->schema() as $name => $field): ?>
-
-                    <?php if ($i++ > 3) break ?>
-                    <th><?php echo $field->label(true) ?></th>
-
-                <?php endforeach ?>
-                <?php else: ?>
-                    <th>Data</th>
-                <?php endif ?>
+                <th>&nbsp;</th>
+                <th>PID</th>
+                <th>IP</th>
+                <th>Mem</th>
+                <th>&nbsp;</th>
 
             </tr>
         </thead>
@@ -30,21 +43,25 @@
             <?php foreach($entries as $entry): ?>
 
             <tr>
-                <?php if (f('app')->controller->schema()): ?>
-                <?php $i = 0 ?>
-                <?php foreach(f('app')->controller->schema() as $name => $field): ?>
 
-                <?php if ($i++ > 3) break ?>
                 <td>
                     <a href="<?php echo f('controller.url', '/'.$entry['$id']) ?>">
-                    <?php echo $field->format('readonly', $entry[$name]) ?>
+                        <div class="indicator <?php echo ($entry->format('plain', 'state') === 'RUNNING') ? 'on' : 'off' ?>"></div>
+                        <?php echo $entry['name'] ?>
                     </a>
                 </td>
 
-                <?php endforeach ?>
-                <?php else: ?>
-                <td><?php echo reset($entry) ?></td>
-                <?php endif ?>
+                <td><?php echo $entry->format('plain', 'pid') ?></td>
+                <td><?php echo $entry->format('plain', 'ip') ?></td>
+                <td><?php echo $entry->format('plain', 'memory_use') ?></td>
+
+                <td>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/start') ?>">[start]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/stop') ?>">[stop]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/network') ?>">[network]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/attach') ?>">[attach]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/chpasswd') ?>">[chpasswd]</a>
+                </td>
 
             </tr>
 

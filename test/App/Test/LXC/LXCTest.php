@@ -2,17 +2,20 @@
 
 namespace App\Test\LXC;
 
-use App\LXC\LXC;
+use App\LXC\ContainerList;
 
-class LXCTest extends \PHPUnit_Framework_TestCase {
+class LXCTest extends \PHPUnit_Framework_TestCase
+{
 
-    public function setUp() {
-        $this->lxc = new LXC(array(
+    public function setUp()
+    {
+        $this->lxc = new ContainerList(array(
             'directory' => '/var/lib/lxc'
         ));
     }
 
-    public function testList() {
+    public function testList()
+    {
         $containers = $this->lxc->find();
 
         foreach ($containers as $key => $container) {

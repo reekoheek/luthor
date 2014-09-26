@@ -2,9 +2,10 @@
 
 namespace App\LXC;
 
-class Host {
-
-    public function getUptime() {
+class Host
+{
+    public function getUptime()
+    {
         $uptime = explode(' ', exec('cat /proc/uptime'));
         $uptime['up'] = $uptime[0];
         $uptime['idle'] = $uptime[1];
@@ -16,7 +17,8 @@ class Host {
         return $uptime;
     }
 
-    public function getCPU() {
+    public function getCPU()
+    {
         $result = '';
         exec('cat /proc/stat | grep cpu', $result);
 
@@ -34,7 +36,8 @@ class Host {
                 'irq' => (int) $line[6],
                 'softirq' => (int) $line[7],
             );
-            $cpu['all'] = $cpu['user'] + $cpu['nice'] + $cpu['system'] + $cpu['idle'] + $cpu['iowait'] + $cpu['irq'] + $cpu['softirq'];
+            $cpu['all'] = $cpu['user'] + $cpu['nice'] + $cpu['system'] +
+                $cpu['idle'] + $cpu['iowait'] + $cpu['irq'] + $cpu['softirq'];
             $cpu['free'] = $cpu['idle'] / $cpu['all'];
             $cpu['usage'] = 1 - $cpu['free'];
             $cpus[$cpu['name']] = $cpu;
@@ -43,7 +46,8 @@ class Host {
         return $cpus;
     }
 
-    public function getMem() {
+    public function getMem()
+    {
         $result = '';
         exec('cat /proc/meminfo', $result);
         $mem = array();
@@ -61,7 +65,8 @@ class Host {
         return $mem;
     }
 
-    public function getDisk() {
+    public function getDisk()
+    {
         $result = exec('df -h /');
         $result = preg_split('/\\s+/', $result);
 
@@ -76,7 +81,8 @@ class Host {
         return $disk;
     }
 
-    public function getInfo() {
+    public function getInfo()
+    {
         $entry = array();
 
         $entry['uptime'] = $this->getUptime();
