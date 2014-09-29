@@ -60,6 +60,7 @@ return array(
         'luthor.ip' => '192.168.122.1',
         'luthor.path' => '/app/luthor/www/index.php',
         'luthor.allowed' => '192.168.122.0/24',
+        'backingStore' => 'btrfs',
     ),
     'bono.theme' => array(
         'class' => '\\ROH\\Theme\\BootstrapTheme',

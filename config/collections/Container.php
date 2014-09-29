@@ -15,7 +15,9 @@ return array(
     'schema' => array(
         'name' => String::create('name')->filter('trim|required'),
 
-        'template' => Reference::create('template')->to('Template', 'name', 'name')->set('transient', true),
+        'origin' => Reference::create('origin')->to('Container', 'name', 'name')->set('transient', true),
+        'template' => Reference::create('template')->to('Template', 'name', 'name')->by(null, array('name' => 1))
+            ->set('transient', true),
 
         'memlimit' => String::create('memlimit', 'Memory Limit'),
         'memswlimit' => String::create('memswlimit', 'Mem+Swap Limit'),

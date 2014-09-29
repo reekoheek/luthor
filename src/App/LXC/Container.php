@@ -41,9 +41,28 @@ class Container extends Object
 
         if (!is_readable($configFile)) {
 
-            $cmd = sprintf('sudo lxc-create -t "%s" -n "%s" 2>&1', $this['template'], $this['name']);
-            $result = '';
-            exec($cmd, $result, $errCode);
+            if (empty($this->options['backingStore'])) {
+                $suffix = '';
+                $snapshotOpts = '';
+            } else {
+                $suffix = ' -B "btrfs" ';
+                $snapshotOpts = ' -s ';
+            }
+
+            if ($this['template']) {
+
+                $cmd = sprintf('sudo lxc-create -t "%s" -n "%s" %s 2>&1', $this['template'], $this['name'], $suffix);
+
+
+                $result = '';
+                exec($cmd, $result, $errCode);
+
+            } else {
+                $cmd = sprintf('sudo lxc-clone -o "%s" -n "%s" %s 2>&1', $this['origin'], $this['name'], $snapshotOpts);
+
+                $result = '';
+                exec($cmd, $result, $errCode);
+            }
 
             if ($errCode) {
                 $e = new FilterException();

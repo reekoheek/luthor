@@ -24,6 +24,7 @@ class ContainerObserver
             $container['name'] = $model['name'];
             if ($model->isNew()) {
                 $container['template'] = $model['template'];
+                $container['origin'] = $model['origin'];
             }
         }
 
