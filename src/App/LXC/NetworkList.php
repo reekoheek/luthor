@@ -45,9 +45,9 @@ class NetworkList
 
         foreach ($result as $key => $value) {
             if ($value) {
-                $value = explode(':', $value);
+                $value = preg_split('/\s+/', $value, 2);
                 $value[0] = strtolower(trim($value[0]));
-                $entry[$value[0]] = trim($value[1]);
+                $entry[trim($value[0], ' \t\n\r\0\x0B:')] = trim($value[1]);
             }
         }
 
