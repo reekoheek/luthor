@@ -8,6 +8,11 @@ Luthor depends on several systems to work.
 2. Libvirt as networking support
 3. Btrfs as filesystem
 
+### Sudoers
+
+www-data ALL=NOPASSWD: /usr/bin/lxc-*
+www-data ALL=NOPASSWD: /var/www/luthor/bin/luthor-*
+www-data ALL=NOPASSWD: /usr/bin/virsh
 
 ## Features
 
