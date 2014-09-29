@@ -107,6 +107,8 @@ class ContainerList
     public function getIndices()
     {
         if (is_null($this->indices)) {
+            $this->indices = array();
+
             exec(sprintf('sudo lxc-ls -1'), $result, $errCode);
             if (!empty($result)) {
                 foreach ($result as $entry) {
