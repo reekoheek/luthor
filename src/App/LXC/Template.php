@@ -19,7 +19,7 @@ class Template extends Object
     public function save()
     {
         $orig = is_readable($this['filename']) ? file_get_contents($this['filename']) : '';
-
+        $this['content'] = html_entity_decode($this['content']);
         if ($orig !== $this['content']) {
             $tmpFile = tempnam('../tmp', 't');
 
