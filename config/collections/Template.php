@@ -1,7 +1,7 @@
 <?php
 
 use Norm\Schema\String;
-use Norm\Schema\Text;
+use Norm\Schema\UnsafeText;
 
 return array(
     'observers' => array(
@@ -10,6 +10,6 @@ return array(
     'schema' => array(
         'name' => String::create('name'),
         'filename' => String::create('filename')->set('readonly', true),
-        'content' => Text::create('content'),
+        'content' => UnsafeText::create('content'),
     ),
 );

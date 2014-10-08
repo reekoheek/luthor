@@ -4,7 +4,8 @@
     "version": "0.0.1",
     "autoload": {
         "psr-0": {
-            "App": "src/"
+            "App": "src/",
+            "Norm": "/home/jafar/workspaces/php/lib/norm/src/"
         }
     },
     "require-dev": {

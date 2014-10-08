@@ -90,6 +90,7 @@ class ContainerController extends NormController
     public function populate()
     {
         try {
+            $this->collection->remove();
             $entries = $this->containers->find();
 
             foreach ($entries as $entry) {
