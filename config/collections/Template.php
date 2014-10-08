@@ -1,7 +1,7 @@
 <?php
 
 use Norm\Schema\String;
-use Norm\Schema\UnsafeText;
+use App\Schema\UnsafeText;
 
 return array(
     'observers' => array(
