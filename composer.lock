@@ -304,6 +304,72 @@
             "time": "2014-01-02 04:08:44"
         },
         {
+            "name": "rhumsaa/uuid",
+            "version": "2.7.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ramsey/uuid.git",
+                "reference": "b976326ca5977d7333f34e3c828ae7c22a49a65a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ramsey/uuid/zipball/b976326ca5977d7333f34e3c828ae7c22a49a65a",
+                "reference": "b976326ca5977d7333f34e3c828ae7c22a49a65a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "doctrine/dbal": ">=2.3",
+                "moontoast/math": "~1.1",
+                "phpunit/phpunit": "~4.1",
+                "satooshi/php-coveralls": "~0.6",
+                "symfony/console": "~2.3"
+            },
+            "suggest": {
+                "doctrine/dbal": "Allow the use of a UUID as doctrine field type.",
+                "moontoast/math": "Support for converting UUID to 128-bit integer (in string form).",
+                "symfony/console": "Support for use of the bin/uuid command line tool."
+            },
+            "bin": [
+                "bin/uuid"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.7.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Rhumsaa\\Uuid\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marijn Huizendveld",
+                    "email": "marijn.huizendveld@gmail.com"
+                },
+                {
+                    "name": "Ben Ramsey",
+                    "homepage": "http://benramsey.com"
+                }
+            ],
+            "description": "A PHP 5.3+ library for generating RFC 4122 version 1, 3, 4, and 5 universally unique identifiers (UUID).",
+            "homepage": "https://github.com/ramsey/uuid",
+            "keywords": [
+                "guid",
+                "identifier",
+                "uuid"
+            ],
+            "time": "2014-08-27 22:39:41"
+        },
+        {
             "name": "slim/slim",
             "version": "2.3.5",
             "source": {
@@ -470,17 +536,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/xinix-technology/norm.git",
-                "reference": "84a1283137cf88b6a094dc861e848de102244d31"
+                "reference": "41477a167c3151a3579dd0575ff2bea588186aff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/84a1283137cf88b6a094dc861e848de102244d31",
-                "reference": "84a1283137cf88b6a094dc861e848de102244d31",
+                "url": "https://api.github.com/repos/xinix-technology/norm/zipball/41477a167c3151a3579dd0575ff2bea588186aff",
+                "reference": "41477a167c3151a3579dd0575ff2bea588186aff",
                 "shasum": ""
             },
             "require": {
                 "reekoheek/jsonkit": "~0.0.1",
-                "reekoheek/util": ">=0.1.2"
+                "reekoheek/util": "~0.1.2",
+                "rhumsaa/uuid": "~2.7"
             },
             "require-dev": {
                 "phpdocumentor/phpdocumentor": "2.*",
@@ -515,7 +582,7 @@
                     "role": "Developer"
                 }
             ],
-            "time": "2014-09-26 08:55:18"
+            "time": "2014-10-08 09:15:17"
         }
     ],
     "packages-dev": [
