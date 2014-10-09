@@ -10,18 +10,11 @@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <?php if (f('app')->controller->schema()): ?>
-                <?php $i = 0 ?>
-                <?php foreach(f('app')->controller->schema() as $name => $field): ?>
-
-                    <?php if ($i++ > 3) break ?>
-                    <th><?php echo $field->label(true) ?></th>
-
-                <?php endforeach ?>
-                <?php else: ?>
-                    <th>Data</th>
-                <?php endif ?>
-
+                <th>Name</th>
+                <th>UUID</th>
+                <th>State</th>
+                <th>Autostart</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -30,22 +23,32 @@
             <?php foreach($entries as $entry): ?>
 
             <tr>
-                <?php if (f('app')->controller->schema()): ?>
-                <?php $i = 0 ?>
-                <?php foreach(f('app')->controller->schema() as $name => $field): ?>
-
-                <?php if ($i++ > 3) break ?>
                 <td>
                     <a href="<?php echo f('controller.url', '/'.$entry['$id']) ?>">
-                    <?php echo $field->format('readonly', $entry[$name]) ?>
+                    <?php echo $entry->format('plain', 'name') ?>
                     </a>
                 </td>
-
-                <?php endforeach ?>
-                <?php else: ?>
-                <td><?php echo $entry->format() ?></td>
-                <?php endif ?>
-
+                <td>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id']) ?>">
+                    <?php echo $entry->format('plain', 'uuid') ?>
+                    </a>
+                </td>
+                <td>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id']) ?>">
+                    <?php echo $entry->format('plain', 'state') ?>
+                    </a>
+                </td>
+                <td>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id']) ?>">
+                    <?php echo $entry->format('plain', 'autostart') ?>
+                    </a>
+                </td>
+                <td>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/start') ?>">[start]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/stop') ?>">[stop]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/autostart') ?>">[autostart]</a>
+                    <a href="<?php echo f('controller.url', '/'.$entry['$id'].'/delete') ?>">[delete]</a>
+                </td>
             </tr>
 
             <?php endforeach ?>

@@ -28,6 +28,15 @@ class NetworkList
     }
 
     /**
+     * Factory for new instance of network
+     * @return App\LXC\Network
+     */
+    public function newInstance()
+    {
+        return new Network(null, $this->config);
+    }
+
+    /**
      * Construct LXC API
      * @param array $config Configuration
      */
@@ -38,22 +47,27 @@ class NetworkList
 
     public function findOne($name)
     {
-        $entry = new Network(array('name' => $name), $this->config);
-
         $result = '';
         exec('sudo virsh -c lxc:/// net-info '.$name, $result, $errCode);
+
+        if ($errCode) {
+            return null;
+        }
+
+        $entry = new Network(array('name' => $name), $this->config);
 
         foreach ($result as $key => $value) {
             if ($value) {
                 $value = preg_split('/\s+/', $value, 2);
                 $value[0] = strtolower(trim($value[0]));
-                $entry[trim($value[0], ' \t\n\r\0\x0B:')] = trim($value[1]);
+                $entry[trim($value[0], ' :')] = trim($value[1]);
             }
         }
 
         $entry['state'] = ($entry['active'] === 'yes') ? 1 : 0;
         $entry['autostart'] = ($entry['autostart'] === 'yes') ? 1 : 0;
         $entry['persistent'] = ($entry['persistent'] === 'yes') ? 1 : 0;
+
         unset($entry['active']);
 
         // $result = '';
@@ -100,14 +114,4 @@ class NetworkList
         $result = '';
         return $this->exec('net-undefine '.$name, array(), $result);
     }
-
-    // protected function exec($command, $args, &$result)
-    // {
-    //     $errCode = 0;
-    //     $cmd = sprintf('sudo virsh -c lxc:/// %s ', $command).implode(' ', $args);
-    //     var_dump($cmd);
-    //     exec($cmd, $result, $errCode);
-    //     var_dump($result);
-    //     return $errCode;
-    // }
 }
