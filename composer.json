@@ -5,7 +5,8 @@
     "autoload": {
         "psr-0": {
             "App": "src/",
-            "Norm": "/home/jafar/workspaces/php/lib/norm/src/"
+            "Norm": "/home/jafar/workspaces/php/lib/norm/src/",
+            "Bono": "/home/jafar/workspaces/php/lib/bono/src/"
         }
     },
     "require-dev": {
