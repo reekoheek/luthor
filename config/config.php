@@ -27,6 +27,7 @@ return array(
         ),
     ),
     'bono.middlewares' => array(
+        '\\Bono\\Middleware\\StaticPageMiddleware' => null,
         '\\Bono\\Middleware\\ControllerMiddleware' => array(
             'default' => '\\Norm\\Controller\\NormController',
             'mapping' => array(
@@ -73,6 +74,7 @@ return array(
                 array( 'label' => 'Network', 'url' => '/network' ),
                 array( 'label' => 'Template', 'url' => '/template' ),
                 array( 'label' => 'User', 'url' => '/user' ),
+                array( 'label' => 'Configuration', 'url' => '/config' ),
             ),
         ),
     ),

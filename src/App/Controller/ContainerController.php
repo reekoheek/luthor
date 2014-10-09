@@ -101,8 +101,8 @@ class ContainerController extends NormController
                 $model->set($entry->toArray());
                 $model->save();
             }
-            h('notification.info', 'Existing containers populated.');
 
+            h('notification.info', 'Existing containers populated.');
         } catch (\Exception $e) {
             h('notification.error', $e);
         }
